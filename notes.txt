@@ -1,0 +1,58 @@
+product
+
+id
+vendor
+strain
+product_type
+subcategory
+subsubcategory
+plant_type
+cbd_min
+cbd_max
+thc_min
+thc_max
+ocs_created_at
+ocs_published_at
+ocs_updated_at
+removed
+url
+
+product_variant
+id
+product_id
+variant_id
+
+variant
+id
+title
+weight
+sku
+available
+ocs_created_at
+ocs_updated_at
+
+variant_stock
+id (variant id)
+price
+quantity
+time
+
+
+Scraping the site:
+- Get all product.json pages and put them in a big list
+- Filter the list by some criteria and return only what we're interested in (English pages for dried flower cannabis)
+- For every item in the list
+  - Parse out the product details
+  - Parse out the variant details
+  - If the product is in the DB already and all of it's variants are as well:
+    - Check products.json update time vs DB update time. If products.json is more recent:
+      - fetch the product page and get stock numbers. Otherwise, get each variant's most recent stock number from the DB.
+    - update the fields in products
+  - Else: fetch the product page for stock numbers, 
+  - Add an entry in product_attributes with the current refresh time
+  - Check if any variant_ids in product_variant are missing from our new data. If yes, print a message. (maybe remove it?)
+  - For every variant
+    - Add an entry in product_variant (if not already existing)
+    - Create or update variant table
+    - Add an entry in variant_stock with the current refresh time
+- Check if any product ids in the DB are not in the filtered list. If so, set removed flag in DB and print something
