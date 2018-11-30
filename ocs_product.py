@@ -1,6 +1,4 @@
-import json
-
-from db import DBReader
+from db import DBReader, DBWriter
 
 class OCSProduct:
     def __init__(self, attr):
@@ -21,7 +19,8 @@ class OCSProduct:
                 'ocs_updated_at',
                 'removed',
                 'url',
-                'variants'
+                'variants',
+                'scrape_time'
                 ]
         for a in valid_attr:
             setattr(self, a, None)
@@ -36,4 +35,12 @@ class OCSProduct:
         else:
             db = DBReader(database)
         return cls(db.get_product(pid))
+
+    def to_db(self, database):
+        if type(database) is DBWriter:
+            db = database
+        else:
+            db = DBWriter(database)
+
+        db.write(self)
 

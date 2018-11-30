@@ -56,3 +56,32 @@ Scraping the site:
     - Create or update variant table
     - Add an entry in variant_stock with the current refresh time
 - Check if any product ids in the DB are not in the filtered list. If so, set removed flag in DB and print something
+
+
+# Class OCSProduct
+
+## Class methods
+- (maybe) get_products: returns the complete set of OCSProducts, combinded from the DB and products.json, with an optional filter applied (language, product type)
+
+## Instance methods
+
+## Instance attributes
+product_id
+vendor
+strain
+product_type
+subcategory
+subsubcategory
+plant_type
+cbd_min
+cbd_max
+thc_min
+thc_max
+created_at
+published_at
+updated_at
+removed - boolean used to denote the item is in the DB but not on the OCS site anymore. Initially None
+url
+
+
+

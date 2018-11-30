@@ -40,8 +40,6 @@ class OCSScraper:
         else:
             filter_type = None
 
-        print('filter:', filter_lang, filter_type)
-
         for p in products:
             if (filter_lang is None or filter_lang in p['tags']) and (filter_type is None or filter_type in p['tags']):
                     d = {}
@@ -59,7 +57,9 @@ class OCSScraper:
                     d['ocs_created_at'] = datetime.datetime.strptime(p['created_at'], '%Y-%m-%dT%H:%M:%S%z')
                     d['ocs_published_at'] = datetime.datetime.strptime(p['published_at'], '%Y-%m-%dT%H:%M:%S%z')
                     d['ocs_updated_at'] = datetime.datetime.strptime(p['updated_at'], '%Y-%m-%dT%H:%M:%S%z')
+                    d['removed'] = False
                     d['url'] = self.url + '/products/' + p['handle']
+                    d['scrape_time'] = self.time
                     d['variants'] = []
                     for v in p['variants']:
                         e = {}
