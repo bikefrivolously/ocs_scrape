@@ -32,7 +32,7 @@ class DBReader:
                 prod['variants'].append(variant)
 
         c.close()
-        print(prod)
+        #print(prod)
         return prod
 
     def get_product_ids(self):
@@ -57,9 +57,9 @@ class DBWriter:
         existing = rc.fetchone()
         if existing:
             # The product already exists so UPDATE
-            print(product.id, 'product exists. Updating.')
-            print(existing)
-            print(product)
+            #print(product.id, 'product exists. Updating.')
+            #print(existing)
+            #print(product)
             rc.execute('''UPDATE product
                 SET vendor = ?, strain = ?, product_type = ?, subcategory = ?,
                 subsubcategory = ?, plant_type = ?,
@@ -71,7 +71,7 @@ class DBWriter:
                 product.ocs_created_at, product.ocs_published_at, product.ocs_updated_at,
                 product.removed, product.url, product.id))
         else:
-            print(product.id, 'adding to database.')
+            #print(product.id, 'adding to database.')
             rc.execute(
                     '''INSERT INTO product VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                     (product.id, product.vendor, product.strain, product.product_type,
@@ -85,9 +85,9 @@ class DBWriter:
             rc.execute("SELECT * FROM variant WHERE id = ?", (v['id'],))
             existing = rc.fetchone()
             if existing:
-                print(v['id'], 'variant exists. Updating.')
-                print(existing)
-                print(v)
+                #print(v['id'], 'variant exists. Updating.')
+                #print(existing)
+                #print(v)
                 rc.execute(
                         '''UPDATE variant
                         SET title = ?, weight = ?, sku = ?, available = ?, ocs_created_at = ?, ocs_updated_at = ?
@@ -104,18 +104,18 @@ class DBWriter:
         
         # Now modify the product_variant table as needed
         scraped = [ (product.id, v['id']) for v in product.variants ]
-        print('Scraped pid, vid links', scraped)
+        #print('Scraped pid, vid links', scraped)
         rc.execute('''SELECT * FROM product_variant WHERE product_id = ?''', (product.id,))
         existing = rc.fetchall()
-        print('Existing pid, vid links', existing)
+        #print('Existing pid, vid links', existing)
         for e in existing:
             if e not in scraped:
                 rc.execute('''DELETE FROM product_variant WHERE product_id = ? AND variant_id = ?''', e)
-                print('product_variant: deleted', e)
+                #print('product_variant: deleted', e)
         for s in scraped:
             if s not in existing:
                 rc.execute('''INSERT INTO product_variant VALUES (?, ?)''', s)
-                print('product_variant: inserted', s)
+                #print('product_variant: inserted', s)
         
         self.conn.commit()
 

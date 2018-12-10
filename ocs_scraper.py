@@ -9,9 +9,9 @@ class OCSScraper:
 
     def __init__(self, url):
         self.url = url
-        self.products = []
 
     def get_products(self):
+        self.products = []
         url = self.url + '/products.json'
         page = 1
         self.time = datetime.datetime.now(datetime.timezone.utc)
@@ -19,7 +19,7 @@ class OCSScraper:
             r = s.get(url, params={'page': page})
             while r.ok and r.json()['products']:
                 products = r.json()['products']
-                print('Found {} products on page {}'.format(len(products), page))
+                #print('Found {} products on page {}'.format(len(products), page))
                 for p in self.filter(products, lang='en', product_type='dried_flower'):
                     self.products.append(OCSProduct(p))            
                 page += 1
