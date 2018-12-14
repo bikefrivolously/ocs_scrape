@@ -5,7 +5,7 @@ from db import DBWriter
 
 def main():
     s = OCSScraper('https://ocs.ca')
-    d = DBWriter('ocs_v1.db')
+    d = DBWriter('ocs_v2.db')
     s.get_products()
     for p in s.products:
         p.to_db(d)
