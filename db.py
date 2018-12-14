@@ -18,16 +18,20 @@ class DBReader:
             prod = dict((c.description[i][0], val) for i, val in enumerate(prod))
             prod['variants'] = []
             
-            vids = c.execute("SELECT variant_id FROM product_variant WHERE product_id = ?", (pid,)).fetchall()
-            for vid in vids:
-                c.execute("SELECT * FROM variant WHERE id = ?", (vid,))
-                variant = dict((c.description[i][0], val) for i, val in enumerate(c.fetchone()))
+            #vids = c.execute("SELECT variant_id FROM product_variant WHERE product_id = ?", (pid,)).fetchall()
+            #for vid in vids:
+            variants = c.execute("SELECT * FROM variants WHERE product_id =?", (pid,)).fetchall()
+            for v in variants:
+                vid = v[0]
+                #c.execute("SELECT * FROM variant WHERE id = ?", (vid,))
+                variant = dict((c.description[i][0], val) for i, val in enumerate(v))
                 
-                c.execute('''SELECT price, quantity, time FROM variant_stock WHERE id = ? AND 
+                c.execute('''SELECT price, quantity, available, time FROM variant_stock WHERE id = ? AND 
                     time = (SELECT MAX(time) FROM variant_stock WHERE id = ?)''', (vid, vid))
-                price, quantity, t = c.fetchone()
+                price, quantity, available, t = c.fetchone()
                 variant['price'] = price
                 variant['quantity'] = quantity
+                variant['available'] = available
                 variant['time'] = t
                 prod['variants'].append(variant)
 
@@ -90,32 +94,19 @@ class DBWriter:
                 #print(v)
                 rc.execute(
                         '''UPDATE variant
-                        SET title = ?, weight = ?, sku = ?, available = ?, ocs_created_at = ?, ocs_updated_at = ?
+                        SET product_id = ?, title = ?, weight = ?, sku = ?, ocs_created_at = ?, ocs_updated_at = ?
                         WHERE id = ?''',
-                        (v['title'], v['weight'], v['sku'], v['available'], v['ocs_created_at'], v['ocs_updated_at'], v['id'])
+                        (product.id, v['title'], v['weight'], v['sku'], v['ocs_created_at'], v['ocs_updated_at'], v['id'])
                         )
             else:
                 rc.execute(
                         '''INSERT INTO variant VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                        (v['id'], v['title'], v['weight'], v['sku'], v['available'], v['ocs_created_at'], v['ocs_updated_at'])
+                        (v['id'], product.id, v['title'], v['weight'], v['sku'], v['ocs_created_at'], v['ocs_updated_at'])
                         )
-            rc.execute('''INSERT INTO variant_stock (id, price, time) VALUES (?, ?, ?)''',
-                    (v['id'], v['price'], v['time']))
+            rc.execute('''INSERT INTO variant_stock (id, price, available, time) VALUES (?, ?, ?, ?)''',
+                    (v['id'], v['price'], v['available'], v['time']))
         
-        # Now modify the product_variant table as needed
-        scraped = [ (product.id, v['id']) for v in product.variants ]
-        #print('Scraped pid, vid links', scraped)
-        rc.execute('''SELECT * FROM product_variant WHERE product_id = ?''', (product.id,))
-        existing = rc.fetchall()
-        #print('Existing pid, vid links', existing)
-        for e in existing:
-            if e not in scraped:
-                rc.execute('''DELETE FROM product_variant WHERE product_id = ? AND variant_id = ?''', e)
-                #print('product_variant: deleted', e)
-        for s in scraped:
-            if s not in existing:
-                rc.execute('''INSERT INTO product_variant VALUES (?, ?)''', s)
-                #print('product_variant: inserted', s)
+        # TODO: clean up the variant table.. flag any unused variants for removal?
         
         self.conn.commit()
 
